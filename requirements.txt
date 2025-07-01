@@ -1,5 +1,5 @@
 openai
 langchain
-serpapi
 python-dotenv
 tiktoken
+google-search-results
