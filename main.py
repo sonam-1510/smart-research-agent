@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 from openai import OpenAI
+from search_tools import search_google
+
 
 # Load API keys from .env file
 load_dotenv()
@@ -11,29 +13,31 @@ if not api_key:
 
 client = OpenAI(api_key=api_key)
 
-# Function to generate research steps using GPT-4
-def plan_research_steps(topic):
+#Function: Use GPT to summarize real-time web search results
+def search_and_summarize(topic):
+    print("🔍 Searching Google...")
+    raw_results = search_google(topic)
+
     prompt = f"""
-    You are a smart research assistant. I want to learn about "{topic}".
-    Break this down into 5 logical learning steps I should follow, starting from beginner level.
-    Be clear and concise.
-    """
+You are an intelligent research assistant.
+Summarize the following search results about "{topic}" into a clear, concise, and structured explanation suitable for a beginner.
 
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.5,
-        )
-        return response.choices[0].message.content
-    except Exception as e:
-        return f"An error occurred while generating research steps: {e}"
+Search Results:
+{raw_results}
+"""
 
-# Entry point of the script
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "user", "content": prompt}
+        ],
+        temperature=0.5,
+    )
+
+    return response.choices[0].message.content
+
+# Main Program
 if __name__ == "__main__":
     topic = input("Enter your research topic: ")
-    steps = plan_research_steps(topic)
-    print("\nHere’s your learning plan:\n")
-    print(steps)
+    print("\n🤖 Here’s your learning plan:\n")
+    print(search_and_summarize(topic))
